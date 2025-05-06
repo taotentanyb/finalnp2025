@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe Game</title>
+    <style>
+        :root {
+            --primary-color: #8a2be2;
+            --secondary-color: #4a0080;
+            --text-color: #ffffff;
+            --card-bg: rgba(25, 25, 25, 0.8);
+            --hover-color: #9d4edd;
+        }
+        
+        body {
+            background-color: #121212;
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background-image: linear-gradient(to bottom right, #1a1a2e, #16213e, #0f3460);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        header {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 1rem;
+            text-align: center;
+            width: 100%;
+            border-bottom: 2px solid var(--primary-color);
+        }
+        
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            text-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
+            margin: 0;
+            cursor: pointer;
+        }
+        
+        .game-container {
+            max-width: 600px;
+            width: 90%;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 10px rgba(138, 43, 226, 0.3);
+        }
+        
+        .game-info {
+            margin-bottom: 2rem;
+            font-size: 1.2rem;
+        }
+        
+        .player-turn {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 10px;
+            margin: 0 auto;
+            max-width: 400px;
+        }
+        
+        .cell {
+            width: 100%;
+            aspect-ratio: 1;
+            background-color: rgba(40, 40, 60, 0.6);
+            border: 2px solid rgba(138, 43, 226, 0.5);
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .cell:hover {
+            background-color: rgba(70, 70, 90, 0.7);
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.3);
+        }
+        
+        .x {
+            color: #ff6b6b;
+            text-shadow: 0 0 10px rgba(255, 107, 107, 0.7);
+        }
+        
+        .o {
+            color: #48dbfb;
+            text-shadow: 0 0 10px rgba(72, 219, 251, 0.7);
+        }
+        
+        .controls {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 30px;
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn:hover {
+            background-color: var(--hover-color);
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(138, 43, 226, 0.5);
+        }
+        
+        .btn-home {
+            background-color: #333;
+        }
+        
+        .btn-home:hover {
+            background-color: #444;
+        }
+        
+        .result-message {
+            margin-top: 2rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            min-height: 2rem;
+        }
+        
+        footer {
+            background-color: rgba(0, 0, 0, 0.7);
+            text-align: center;
+            padding: 1rem;
+            color: #aaa;
+            font-size: 0.9rem;
+            width: 100%;
+            margin-top: auto;
+            border-top: 2px solid var(--primary-color);
+        }
+        
+        .difficulty {
+            margin: 1.5rem 0;
+        }
+        
+        .difficulty-btn {
+            background-color: rgba(40, 40, 60, 0.6);
+            border: 2px solid rgba(138, 43, 226, 0.3);
+            color: white;
+            padding: 8px 16px;
+            margin: 0 5px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .difficulty-btn.active {
+            background-color: var(--primary-color);
+            border-color: white;
+        }
+        
+        .difficulty-btn:hover {
+            background-color: rgba(138, 43, 226, 0.5);
+        }
+
+        .game-mode {
+            margin: 1.5rem 0;
+        }
+        
+        .game-mode-btn {
+            background-color: rgba(40, 40, 60, 0.6);
+            border: 2px solid rgba(138, 43, 226, 0.3);
+            color: white;
+            padding: 8px 16px;
+            margin: 0 5px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .game-mode-btn.active {
+            background-color: var(--primary-color);
+            border-color: white;
+        }
+        
+        .game-mode-btn:hover {
+            background-color: rgba(138, 43, 226, 0.5);
+        }
+
+        .online-options {
+            margin-top: 1.5rem;
+            display: none;
+        }
+
+        .online-options.active {
+            display: block;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .username-container {
+            margin: 1rem 0;
+        }
+
+        .username-input {
+            padding: 8px 15px;
+            background-color: rgba(60, 60, 80, 0.7);
+            border: 1px solid rgba(138, 43, 226, 0.5);
+            border-radius: 20px;
+            color: white;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .username-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
+        }
+
+        .connection-status {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        .status-disconnected {
+            background-color: #ff6b6b;
+        }
+
+        .status-connected {
+            background-color: #4cd137;
+        }
+
+        .status-waiting {
+            background-color: #fbc531;
+        }
+
+        .opponent-info {
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .opponent-info.active {
+            display: block;
+        }
+        
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 1.5rem;
+            }
+            
+            .cell {
+                font-size: 2.5rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 class="logo" onclick="location.href='tiktaktoe.html';">Game Portal</h1>
+    </header>
+    
+    <div class="game-container">
+        <h1>Tic Tac Toe</h1>
+        
+        <div class="game-info">
+            <p>Current player: <span class="player-turn">X</span></p>
+        </div>
+
+        <div class="game-mode">
+            <p>Game Mode:</p>
+            <button class="game-mode-btn active" data-mode="ai">vs AI</button>
+            <button class="game-mode-btn" data-mode="online">Online Multiplayer</button>
+        </div>
+        
+        <div class="online-options">
+            <div class="username-container">
+                <input type="text" class="username-input" placeholder="Enter your username" maxlength="15">
+            </div>
+            <div class="connection-status">
+                <span class="status-indicator status-disconnected"></span> Disconnected
+            </div>
+            <div class="controls online-controls">
+                <button class="btn btn-connect">Connect</button>
+                <button class="btn btn-find-match" disabled>Find Match</button>
+                <button class="btn btn-cancel-match" disabled>Cancel Matchmaking</button>
+            </div>
+
+            <div class="opponent-info">
+                <p>Playing against: <span class="opponent-name"></span></p>
+                <p>You are: <span class="player-symbol"></span></p>
+            </div>
+        </div>
+        
+        <div class="difficulty">
+            <p>Difficulty:</p>
+            <button class="difficulty-btn active" data-level="easy">Easy</button>
+            <button class="difficulty-btn" data-level="medium">Medium</button>
+            <button class="difficulty-btn" data-level="hard">Hard</button>
+        </div>
+        
+        <div class="board">
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+            <div class="cell" data-index="4"></div>
+            <div class="cell" data-index="5"></div>
+            <div class="cell" data-index="6"></div>
+            <div class="cell" data-index="7"></div>
+            <div class="cell" data-index="8"></div>
+        </div>
+        
+        <div class="result-message"></div>
+        
+        <div class="controls game-controls">
+            <button class="btn btn-reset">Reset Game</button>
+            <button class="btn btn-home" onclick="location.href='tiktaktoe.html';">Back to Home</button>
+        </div>
+    </div>
+    
+    <footer>
+        <p>© 2023 Game Portal. All rights reserved.</p>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const cells = document.querySelectorAll('.cell');
+            const playerTurn = document.querySelector('.player-turn');
+            const resultMessage = document.querySelector('.result-message');
+            const resetButton = document.querySelector('.btn-reset');
+            const difficultyButtons = document.querySelectorAll('.difficulty-btn');
+            const gameModeButtons = document.querySelectorAll('.game-mode-btn');
+            const onlineOptionsContainer = document.querySelector('.online-options');
+            const difficultyContainer = document.querySelector('.difficulty');
+            const connectButton = document.querySelector('.btn-connect');
+            const findMatchButton = document.querySelector('.btn-find-match');
+            const cancelMatchButton = document.querySelector('.btn-cancel-match');
+            const usernameInput = document.querySelector('.username-input');
+            const connectionStatus = document.querySelector('.connection-status');
+            const opponentInfo = document.querySelector('.opponent-info');
+            const opponentName = document.querySelector('.opponent-name');
+            const playerSymbol = document.querySelector('.player-symbol');
+            
+            let currentPlayer = 'X';
+            let gameBoard = ['', '', '', '', '', '', '', '', ''];
+            let gameActive = true;
+            let againstAI = true;
+            let difficulty = 'easy';
+            let gameMode = 'ai';
+            let socket = null;
+            let connected = false;
+            let matchmaking = false;
+            let onlineGameActive = false;
+            let mySymbol = null;
+            
+            // Winning combinations
+            const winningCombinations = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
+                [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
+                [0, 4, 8], [2, 4, 6]             // diagonals
+            ];
+            
+            // Initialize the game
+            function initGame() {
+                cells.forEach(cell => {
+                    cell.textContent = '';
+                    cell.classList.remove('x', 'o');
+                    cell.addEventListener('click', handleCellClick);
+                });
+                
+                gameBoard = ['', '', '', '', '', '', '', '', ''];
+                gameActive = true;
+                onlineGameActive = false;
+                currentPlayer = 'X';
+                playerTurn.textContent = currentPlayer;
+                resultMessage.textContent = '';
+                
+                difficultyButtons.forEach(button => {
+                    button.addEventListener('click', handleDifficultyChange);
+                });
+
+                gameModeButtons.forEach(button => {
+                    button.addEventListener('click', handleGameModeChange);
+                });
+
+                connectButton.addEventListener('click', handleConnect);
+                findMatchButton.addEventListener('click', findMatch);
+                cancelMatchButton.addEventListener('click', cancelMatchmaking);
+
+                opponentInfo.classList.remove('active');
+            }
+            
+            // Handle cell click
+            function handleCellClick(e) {
+                const cell = e.target;
+                const index = parseInt(cell.getAttribute('data-index'));
+                
+                // Check if cell is already filled or game is over
+                if (gameBoard[index] !== '' || !gameActive) {
+                    return;
+                }
+
+                if (gameMode === 'online' && onlineGameActive) {
+                    // Online game logic
+                    if (currentPlayer !== mySymbol) {
+                        return; // Not this player's turn
+                    }
+
+                    // Send move to server
+                    sendToServer({
+                        action: 'move',
+                        position: index
+                    });
+
+                    // Update cell
+                    updateCell(cell, index);
+                    checkGameStatus();
+                } else if (gameMode === 'ai') {
+                    // AI game logic
+                    // Update cell, game board and check game status
+                    updateCell(cell, index);
+                    checkGameStatus();
+                    
+                    // If game is still active and it's AI's turn
+                    if (gameActive && againstAI && currentPlayer === 'O') {
+                        setTimeout(makeAIMove, 500);
+                    }
+                }
+            }
+            
+            // Update cell
+            function updateCell(cell, index) {
+                gameBoard[index] = currentPlayer;
+                cell.textContent = currentPlayer;
+                cell.classList.add(currentPlayer.toLowerCase());
+                togglePlayer();
+            }
+            
+            // Toggle player
+            function togglePlayer() {
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                playerTurn.textContent = currentPlayer;
+            }
+            
+            // Check game status
+            function checkGameStatus() {
+                let roundWon = false;
+                
+                // Check for win
+                for (let i = 0; i < winningCombinations.length; i++) {
+                    const [a, b, c] = winningCombinations[i];
+                    if (gameBoard[a] && gameBoard[a] === gameBoard[b] && gameBoard[a] === gameBoard[c]) {
+                        roundWon = true;
+                        break;
+                    }
+                }
+                
+                if (roundWon) {
+                    const winner = currentPlayer === 'X' ? 'O' : 'X'; // Previous player won
+                    resultMessage.textContent = `Player ${winner} wins!`;
+                    gameActive = false;
+
+                    if (gameMode === 'online' && onlineGameActive) {
+                        sendToServer({
+                            action: 'game_over',
+                            result: 'win'
+                        });
+                        onlineGameActive = false;
+                    }
+                    return;
+                }
+                
+                // Check for draw
+                if (!gameBoard.includes('')) {
+                    resultMessage.textContent = 'Game ended in a draw!';
+                    gameActive = false;
+
+                    if (gameMode === 'online' && onlineGameActive) {
+                        sendToServer({
+                            action: 'game_over',
+                            result: 'draw'
+                        });
+                        onlineGameActive = false;
+                    }
+                    return;
+                }
+            }
+            
+            // AI move depending on difficulty
+            function makeAIMove() {
+                let index;
+                
+                switch(difficulty) {
+                    case 'easy':
+                        index = makeRandomMove();
+                        break;
+                    case 'medium':
+                        // 50% chance of making a smart move
+                        index = Math.random() < 0.5 ? makeSmartMove() : makeRandomMove();
+                        break;
+                    case 'hard':
+                        index = makeSmartMove();
+                        break;
+                    default:
+                        index = makeRandomMove();
+                }
+                
+                const cell = document.querySelector(`.cell[data-index="${index}"]`);
+                updateCell(cell, index);
+                checkGameStatus();
+            }
+            
+            // Random AI move
+            function makeRandomMove() {
+                const availableMoves = gameBoard
+                    .map((value, index) => value === '' ? index : null)
+                    .filter(value => value !== null);
+                
+                return availableMoves[Math.floor(Math.random() * availableMoves.length)];
+            }
+            
+            // Smart AI move
+            function makeSmartMove() {
+                // Try to win
+                for (let i = 0; i < winningCombinations.length; i++) {
+                    const [a, b, c] = winningCombinations[i];
+                    // Check if AI can win with one move
+                    if (gameBoard[a] === 'O' && gameBoard[b] === 'O' && gameBoard[c] === '') {
+                        return c;
+                    }
+                    if (gameBoard[a] === 'O' && gameBoard[c] === 'O' && gameBoard[b] === '') {
+                        return b;
+                    }
+                    if (gameBoard[b] === 'O' && gameBoard[c] === 'O' && gameBoard[a] === '') {
+                        return a;
+                    }
+                }
+                
+                // Block player from winning
+                for (let i = 0; i < winningCombinations.length; i++) {
+                    const [a, b, c] = winningCombinations[i];
+                    // Check if player can win with one move
+                    if (gameBoard[a] === 'X' && gameBoard[b] === 'X' && gameBoard[c] === '') {
+                        return c;
+                    }
+                    if (gameBoard[a] === 'X' && gameBoard[c] === 'X' && gameBoard[b] === '') {
+                        return b;
+                    }
+                    if (gameBoard[b] === 'X' && gameBoard[c] === 'X' && gameBoard[a] === '') {
+                        return a;
+                    }
+                }
+                
+                // Take center if available
+                if (gameBoard[4] === '') {
+                    return 4;
+                }
+                
+                // Take corner
+                const corners = [0, 2, 6, 8].filter(index => gameBoard[index] === '');
+                if (corners.length > 0) {
+                    return corners[Math.floor(Math.random() * corners.length)];
+                }
+                
+                // Take any available spot
+                return makeRandomMove();
+            }
+            
+            // Handle difficulty change
+            function handleDifficultyChange(e) {
+                difficultyButtons.forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+                difficulty = e.target.getAttribute('data-level');
+                resetGame();
+            }
+
+            // Handle game mode change
+            function handleGameModeChange(e) {
+                gameModeButtons.forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+                gameMode = e.target.getAttribute('data-mode');
+                
+                if (gameMode === 'online') {
+                    onlineOptionsContainer.classList.add('active');
+                    difficultyContainer.style.display = 'none';
+                } else {
+                    onlineOptionsContainer.classList.remove('active');
+                    difficultyContainer.style.display = 'block';
+                }
+                
+                resetGame();
+            }
+
+            // WebSocket functions
+            function handleConnect() {
+                if (connected) {
+                    disconnectFromServer();
+                    return;
+                }
+
+                const username = usernameInput.value.trim();
+                if (!username) {
+                    alert('Please enter a username');
+                    return;
+                }
+
+                // Connect to our WebSocket server
+                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                const wsUrl = `${protocol}//${window.location.host}`;
+                try {
+                    socket = new WebSocket(wsUrl);
+                    
+                    socket.onopen = () => {
+                        connected = true;
+                        updateConnectionStatus('connected', 'Connected');
+                        connectButton.textContent = 'Disconnect';
+                        findMatchButton.disabled = false;
+                        
+                        // Send initial player info
+                        sendToServer({
+                            action: 'player_info',
+                            username: username
+                        });
+                    };
+                    
+                    socket.onmessage = (event) => {
+                        handleServerMessage(event.data);
+                    };
+                    
+                    socket.onclose = () => {
+                        disconnectFromServer();
+                    };
+                    
+                    socket.onerror = (error) => {
+                        console.error('WebSocket error:', error);
+                        disconnectFromServer();
+                    };
+                } catch (error) {
+                    console.error('Failed to connect:', error);
+                    disconnectFromServer();
+                }
+            }
+
+            function disconnectFromServer() {
+                if (socket) {
+                    socket.close();
+                }
+                
+                connected = false;
+                matchmaking = false;
+                onlineGameActive = false;
+                updateConnectionStatus('disconnected', 'Disconnected');
+                connectButton.textContent = 'Connect';
+                findMatchButton.disabled = true;
+                cancelMatchButton.disabled = true;
+                
+                if (gameMode === 'online') {
+                    resetGame();
+                }
+            }
+
+            function updateConnectionStatus(status, text) {
+                const statusIndicator = connectionStatus.querySelector('.status-indicator');
+                statusIndicator.className = 'status-indicator';
+                statusIndicator.classList.add(`status-${status}`);
+                connectionStatus.textContent = '';
+                connectionStatus.appendChild(statusIndicator);
+                connectionStatus.appendChild(document.createTextNode(` ${text}`));
+            }
+
+            function sendToServer(data) {
+                if (socket && socket.readyState === WebSocket.OPEN) {
+                    socket.send(JSON.stringify(data));
+                }
+            }
+
+            function handleServerMessage(message) {
+                try {
+                    const data = JSON.parse(message);
+                    const action = data.action;
+                    
+                    switch (action) {
+                        case 'waiting_for_match':
+                            updateConnectionStatus('waiting', 'Waiting for opponent...');
+                            cancelMatchButton.disabled = false;
+                            break;
+                            
+                        case 'match_found':
+                            matchmaking = false;
+                            onlineGameActive = true;
+                            mySymbol = data.symbol || 'X';
+                            
+                            // Update UI
+                            updateConnectionStatus('connected', 'In game');
+                            findMatchButton.disabled = true;
+                            cancelMatchButton.disabled = true;
+                            
+                            // Show opponent info
+                            opponentInfo.classList.add('active');
+                            opponentName.textContent = data.opponent.username;
+                            playerSymbol.textContent = mySymbol;
+                            
+                            // Reset board for new game
+                            resetGame();
+                            break;
+                            
+                        case 'move':
+                            if (onlineGameActive && data.position !== undefined) {
+                                const cell = document.querySelector(`.cell[data-index="${data.position}"]`);
+                                if (cell && gameBoard[data.position] === '') {
+                                    // Apply opponent's move
+                                    const opponentSymbol = mySymbol === 'X' ? 'O' : 'X';
+                                    gameBoard[data.position] = opponentSymbol;
+                                    cell.textContent = opponentSymbol;
+                                    cell.classList.add(opponentSymbol.toLowerCase());
+                                    
+                                    // It's now player's turn
+                                    currentPlayer = mySymbol;
+                                    playerTurn.textContent = currentPlayer;
+                                    
+                                    // Check game status
+                                    checkGameStatus();
+                                }
+                            }
+                            break;
+                            
+                        case 'game_over':
+                            onlineGameActive = false;
+                            if (data.reason === 'opponent_disconnected') {
+                                resultMessage.textContent = 'Opponent disconnected. You win!';
+                                gameActive = false;
+                            }
+                            break;
+                            
+                        case 'matchmaking_cancelled':
+                            matchmaking = false;
+                            updateConnectionStatus('connected', 'Connected');
+                            findMatchButton.disabled = false;
+                            cancelMatchButton.disabled = true;
+                            break;
+                    }
+                } catch (error) {
+                    console.error('Error parsing message:', error);
+                }
+            }
+
+            function findMatch() {
+                if (!connected) return;
+                
+                matchmaking = true;
+                sendToServer({ action: 'find_match' });
+                updateConnectionStatus('waiting', 'Finding match...');
+                findMatchButton.disabled = true;
+                cancelMatchButton.disabled = false;
+            }
+
+            function cancelMatchmaking() {
+                if (!connected || !matchmaking) return;
+                
+                sendToServer({ action: 'cancel_matchmaking' });
+                matchmaking = false;
+                updateConnectionStatus('connected', 'Connected');
+                findMatchButton.disabled = false;
+                cancelMatchButton.disabled = true;
+            }
+            
+            // Reset the game
+            function resetGame() {
+                initGame();
+            }
+            
+            // Event listener for reset button
+            resetButton.addEventListener('click', resetGame);
+            
+            // Initialize the game
+            initGame();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Portal - Profile</title>
+    <style>
+        :root {
+            --primary-color: #ff0000;
+            --secondary-color: #800000;
+            --text-color: #ffffff;
+            --card-bg: rgba(25, 25, 25, 0.8);
+            --hover-color: #ff3333;
+        }
+        
+        body {
+            background-color: #121212;
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background-image: linear-gradient(to bottom right, #1a1a2e, #16213e, #0f3460);
+        }
+        
+        header {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 1rem;
+            text-align: center;
+            width: 100%;
+            border-bottom: 2px solid var(--primary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            text-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
+            margin: 0;
+            cursor: pointer;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        nav ul li {
+            margin-left: 1.5rem;
+        }
+        
+        nav ul li a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        nav ul li a:hover {
+            color: var(--primary-color);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        
+        .profile-header {
+            display: flex;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-right: 2rem;
+            box-shadow: 0 0 15px rgba(138, 43, 226, 0.5);
+        }
+        
+        .user-info h1 {
+            margin: 0 0 0.5rem 0;
+            color: var(--primary-color);
+        }
+        
+        .user-info p {
+            margin: 0.5rem 0;
+            color: #aaa;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        
+        .stat-card {
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .stat-card h3 {
+            color: #aaa;
+            margin-top: 0;
+        }
+        
+        .stat-card .value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 0.5rem 0;
+            color: var(--primary-color);
+        }
+        
+        .game-history {
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .history-title {
+            margin: 0;
+            color: var(--primary-color);
+        }
+        
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .history-table th,
+        .history-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .history-table th {
+            color: #aaa;
+            font-weight: bold;
+        }
+        
+        .history-table tr:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .result-badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+        
+        .win {
+            background-color: rgba(85, 239, 196, 0.2);
+            color: #55efbf;
+        }
+        
+        .loss {
+            background-color: rgba(255, 87, 87, 0.2);
+            color: #ff5757;
+        }
+        
+        .draw {
+            background-color: rgba(253, 203, 110, 0.2);
+            color: #fdcb6e;
+        }
+        
+        .view-btn {
+            background-color: rgba(138, 43, 226, 0.2);
+            color: #9b59b6;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+        
+        .view-btn:hover {
+            background-color: rgba(138, 43, 226, 0.4);
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+        
+        .pagination button {
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #aaa;
+            padding: 0.5rem 1rem;
+            margin: 0 0.25rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .pagination button:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .pagination button.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .pagination button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        
+        footer {
+            background-color: rgba(0, 0, 0, 0.7);
+            text-align: center;
+            padding: 1rem;
+            color: #aaa;
+            font-size: 0.9rem;
+            width: 100%;
+            margin-top: 3rem;
+            border-top: 2px solid var(--primary-color);
+        }
+        
+        .error-message {
+            background-color: rgba(255, 87, 87, 0.2);
+            border: 1px solid #ff5757;
+            color: #ff5757;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .loader {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .loader:after {
+            content: " ";
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            margin: 0 auto;
+            border-radius: 50%;
+            border: 6px solid var(--primary-color);
+            border-color: var(--primary-color) transparent var(--primary-color) transparent;
+            animation: loader 1.2s linear infinite;
+        }
+        
+        @keyframes loader {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 class="logo" onclick="location.href='tiktaktoe.html';">Game Portal</h1>
+        <nav>
+            <ul>
+                <li><a href="tiktaktoe.html">Games</a></li>
+                <li><a href="profile.html" class="active">Profile</a></li>
+                <li><a href="#" id="logout-btn">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <div class="container">
+        <div id="error-container"></div>
+        <div id="loader" class="loader"></div>
+        
+        <div id="profile-content" style="display: none;">
+            <div class="profile-header">
+                <div class="avatar" id="user-avatar"></div>
+                <div class="user-info">
+                    <h1 id="username">Loading...</h1>
+                    <p id="user-email">Loading...</p>
+                    <p>Member since <span id="join-date">Loading...</span></p>
+                </div>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Games</h3>
+                    <div class="value" id="total-games">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Wins</h3>
+                    <div class="value" id="wins">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Losses</h3>
+                    <div class="value" id="losses">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Draws</h3>
+                    <div class="value" id="draws">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Win Rate</h3>
+                    <div class="value" id="win-rate">0%</div>
+                </div>
+            </div>
+            
+            <div class="game-history">
+                <div class="history-header">
+                    <h2 class="history-title">Game History</h2>
+                </div>
+                
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Game</th>
+                            <th>Opponent</th>
+                            <th>Result</th>
+                            <th>Duration</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-table-body">
+                        <!-- Game history will be loaded here -->
+                    </tbody>
+                </table>
+                
+                <div class="pagination" id="pagination">
+                    <!-- Pagination will be added here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>©2025 Game Portal. All rights reserved.</p>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const API_URL = '/api';
+            const token = localStorage.getItem('token');
+            const errorContainer = document.getElementById('error-container');
+            const loader = document.getElementById('loader');
+            const profileContent = document.getElementById('profile-content');
+            
+            // Check if user is logged in
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Logout function
+            document.getElementById('logout-btn').addEventListener('click', (e) => {
+                e.preventDefault();
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = 'login.html';
+            });
+            
+            // Show loader
+            function showLoader() {
+                loader.style.display = 'block';
+                profileContent.style.display = 'none';
+            }
+            
+            // Hide loader
+            function hideLoader() {
+                loader.style.display = 'none';
+                profileContent.style.display = 'block';
+            }
+            
+            // Show error
+            function showError(message) {
+                errorContainer.innerHTML = `<div class="error-message">${message}</div>`;
+            }
+            
+            // Format date
+            function formatDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+            }
+            
+            // Format duration
+            function formatDuration(seconds) {
+                if (seconds < 60) {
+                    return `${seconds} sec`;
+                }
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                return `${minutes}m ${remainingSeconds}s`;
+            }
+            
+            // Load user profile
+            async function loadUserProfile() {
+                showLoader();
+                
+                try {
+                    const response = await fetch(`${API_URL}/users/profile`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('Failed to load profile');
+                    }
+                    
+                    const user = await response.json();
+                    
+                    // Update user info
+                    document.getElementById('username').textContent = user.username;
+                    document.getElementById('user-email').textContent = user.email;
+                    
+                    // Set avatar initials
+                    const avatar = document.getElementById('user-avatar');
+                    avatar.textContent = user.username.charAt(0).toUpperCase();
+                    
+                    // Set join date
+                    const joinDate = new Date(user.createdAt);
+                    document.getElementById('join-date').textContent = joinDate.toLocaleDateString();
+                    
+                    // Load user stats
+                    loadUserStats();
+                    
+                    // Load game history
+                    loadGameHistory(1);
+                    
+                } catch (error) {
+                    showError(error.message || 'Failed to load profile');
+                    hideLoader();
+                }
+            }
+            
+            // Load user stats
+            async function loadUserStats() {
+                try {
+                    const response = await fetch(`${API_URL}/games/stats/summary`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('Failed to load stats');
+                    }
+                    
+                    const stats = await response.json();
+                    
+                    // Update stats display
+                    document.getElementById('total-games').textContent = stats.total;
+                    document.getElementById('wins').textContent = stats.wins;
+                    document.getElementById('losses').textContent = stats.losses;
+                    document.getElementById('draws').textContent = stats.draws;
+                    document.getElementById('win-rate').textContent = `${stats.winRate}%`;
+                    
+                } catch (error) {
+                    console.error('Error loading stats:', error);
+                }
+            }
+            
+            // Load game history
+            async function loadGameHistory(page, limit = 10) {
+                try {
+                    const response = await fetch(`${API_URL}/games/history?page=${page}&limit=${limit}`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('Failed to load game history');
+                    }
+                    
+                    const data = await response.json();
+                    const { games, pagination } = data;
+                    
+                    // Clear table
+                    const tableBody = document.getElementById('history-table-body');
+                    tableBody.innerHTML = '';
+                    
+                    if (games.length === 0) {
+                        // No games played yet
+                        tableBody.innerHTML = `
+                            <tr>
+                                <td colspan="6" style="text-align: center;">No games played yet</td>
+                            </tr>
+                        `;
+                    } else {
+                        // Add game rows
+                        games.forEach(game => {
+                            const row = document.createElement('tr');
+                            
+                            // Result badge class
+                            const resultClass = game.result === 'win' 
+                                ? 'win' : game.result === 'loss' 
+                                ? 'loss' : 'draw';
+                            
+                            row.innerHTML = `
+                                <td>${formatDate(game.createdAt)}</td>
+                                <td>${game.gameType === 'tictactoe' ? 'Tic Tac Toe' : game.gameType}</td>
+                                <td>${game.opponent}</td>
+                                <td><span class="result-badge ${resultClass}">${game.result}</span></td>
+                                <td>${formatDuration(game.duration)}</td>
+                                <td><button class="view-btn" data-id="${game._id}">View</button></td>
+                            `;
+                            
+                            tableBody.appendChild(row);
+                        });
+                        
+                        // Add event listeners to view buttons
+                        document.querySelectorAll('.view-btn').forEach(button => {
+                            button.addEventListener('click', () => {
+                                const gameId = button.getAttribute('data-id');
+                                // In a real app, you'd open a modal or redirect to a game details page
+                                alert(`View game details for ID: ${gameId}`);
+                            });
+                        });
+                        
+                        // Update pagination
+                        updatePagination(pagination, page);
+                    }
+                    
+                    hideLoader();
+                } catch (error) {
+                    showError(error.message || 'Failed to load game history');
+                    hideLoader();
+                }
+            }
+            
+            // Update pagination controls
+            function updatePagination(pagination, currentPage) {
+                const paginationEl = document.getElementById('pagination');
+                paginationEl.innerHTML = '';
+                
+                if (pagination.pages <= 1) {
+                    return;
+                }
+                
+                // Previous button
+                const prevButton = document.createElement('button');
+                prevButton.textContent = 'Previous';
+                prevButton.disabled = currentPage === 1;
+                prevButton.addEventListener('click', () => {
+                    loadGameHistory(currentPage - 1);
+                });
+                paginationEl.appendChild(prevButton);
+                
+                // Page buttons
+                const maxButtons = 5;
+                const startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+                const endPage = Math.min(pagination.pages, startPage + maxButtons - 1);
+                
+                for (let i = startPage; i <= endPage; i++) {
+                    const pageButton = document.createElement('button');
+                    pageButton.textContent = i;
+                    pageButton.classList.toggle('active', i === currentPage);
+                    pageButton.addEventListener('click', () => {
+                        loadGameHistory(i);
+                    });
+                    paginationEl.appendChild(pageButton);
+                }
+                
+                // Next button
+                const nextButton = document.createElement('button');
+                nextButton.textContent = 'Next';
+                nextButton.disabled = currentPage === pagination.pages;
+                nextButton.addEventListener('click', () => {
+                    loadGameHistory(currentPage + 1);
+                });
+                paginationEl.appendChild(nextButton);
+            }
+            
+            // Initialize
+            loadUserProfile();
+        });
+    </script>
+</body>
+</html> 

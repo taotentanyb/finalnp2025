@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Portal - Login</title>
+    <style>
+        :root {
+            --primary-color: #ff0000;
+            --secondary-color: #800000;
+            --text-color: #ffffff;
+            --card-bg: rgba(25, 25, 25, 0.8);
+            --hover-color: #ff3333;
+        }
+        
+        body {
+            background-color: #121212;
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background-image: linear-gradient(to bottom right, #1a1a2e, #16213e, #0f3460);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        header {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 1rem;
+            text-align: center;
+            width: 100%;
+            border-bottom: 2px solid var(--primary-color);
+        }
+        
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            text-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
+            margin: 0;
+            cursor: pointer;
+        }
+        
+        .auth-container {
+            max-width: 400px;
+            width: 90%;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 10px rgba(138, 43, 226, 0.3);
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+        }
+        
+        .form-container form {
+            display: none;
+        }
+        
+        .form-container form.active {
+            display: block;
+        }
+        
+        .input-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            background-color: rgba(40, 40, 60, 0.6);
+            border: 2px solid rgba(138, 43, 226, 0.3);
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 10px rgba(138, 43, 226, 0.3);
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 30px;
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            margin-top: 1rem;
+        }
+        
+        .btn:hover {
+            background-color: var(--hover-color);
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(138, 43, 226, 0.5);
+        }
+        
+        .form-footer {
+            margin-top: 2rem;
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+        
+        .form-footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .error {
+            background-color: rgba(255, 87, 87, 0.2);
+            border: 1px solid #ff5757;
+            color: #ff5757;
+        }
+        
+        .success {
+            background-color: rgba(85, 239, 196, 0.2);
+            border: 1px solid #55efbf;
+            color: #55efbf;
+        }
+        
+        footer {
+            background-color: rgba(0, 0, 0, 0.7);
+            text-align: center;
+            padding: 1rem;
+            color: #aaa;
+            font-size: 0.9rem;
+            width: 100%;
+            margin-top: auto;
+            border-top: 2px solid var(--primary-color);
+        }
+        
+        @media (max-width: 768px) {
+            .auth-container {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 class="logo" onclick="location.href='tiktaktoe.html';">Game Portal</h1>
+    </header>
+    
+    <div class="auth-container">
+        <div class="tabs">
+            <div class="tab active" data-tab="login">Login</div>
+            <div class="tab" data-tab="signup">Sign Up</div>
+        </div>
+        
+        <div class="form-container">
+            <div id="message" class="message"></div>
+            
+            <form id="login-form" class="active">
+                <div class="input-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" required>
+                </div>
+                <div class="input-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" required>
+                </div>
+                <button type="submit" class="btn">Login</button>
+                <div class="form-footer">
+                    <p>Don't have an account? <a href="#" class="switch-form" data-form="signup">Sign up now</a></p>
+                </div>
+            </form>
+            
+            <form id="signup-form">
+                <div class="input-group">
+                    <label for="signup-username">Username</label>
+                    <input type="text" id="signup-username" required>
+                </div>
+                <div class="input-group">
+                    <label for="signup-email">Email</label>
+                    <input type="email" id="signup-email" required>
+                </div>
+                <div class="input-group">
+                    <label for="signup-password">Password</label>
+                    <input type="password" id="signup-password" required>
+                </div>
+                <div class="input-group">
+                    <label for="signup-confirm">Confirm Password</label>
+                    <input type="password" id="signup-confirm" required>
+                </div>
+                <button type="submit" class="btn">Sign Up</button>
+                <div class="form-footer">
+                    <p>Already have an account? <a href="#" class="switch-form" data-form="login">Login now</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <footer>
+        <p>©2025 Game Portal. All rights reserved.</p>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabs = document.querySelectorAll('.tab');
+            const forms = document.querySelectorAll('form');
+            const switchLinks = document.querySelectorAll('.switch-form');
+            const messageElement = document.getElementById('message');
+            
+            // API base URL
+            const API_URL = '/api';
+            
+            // Check if user is already logged in
+            const token = localStorage.getItem('token');
+            if (token) {
+                // Verify token and redirect if valid
+                fetch(`${API_URL}/users/profile`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = 'tiktaktoe.html';
+                    } else {
+                        // Clear invalid token
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('user');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error verifying token:', error);
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                });
+            }
+            
+            // Handle tab switching
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const targetForm = tab.getAttribute('data-tab');
+                    
+                    // Update active tab
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    // Show corresponding form
+                    forms.forEach(form => form.classList.remove('active'));
+                    document.getElementById(`${targetForm}-form`).classList.add('active');
+                    
+                    // Clear message
+                    hideMessage();
+                });
+            });
+            
+            // Handle form switching links
+            switchLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetForm = link.getAttribute('data-form');
+                    
+                    // Update active tab
+                    tabs.forEach(t => t.classList.remove('active'));
+                    document.querySelector(`.tab[data-tab="${targetForm}"]`).classList.add('active');
+                    
+                    // Show corresponding form
+                    forms.forEach(form => form.classList.remove('active'));
+                    document.getElementById(`${targetForm}-form`).classList.add('active');
+                    
+                    // Clear message
+                    hideMessage();
+                });
+            });
+            
+            // Handle login form submission
+            document.getElementById('login-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+                
+                // Validate inputs
+                if (!email || !password) {
+                    showMessage('Please fill in all fields', 'error');
+                    return;
+                }
+                
+                try {
+                    const response = await fetch(`${API_URL}/users/login`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ email, password })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Login failed');
+                    }
+                    
+                    // Store token and user info
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    
+                    showMessage('Login successful! Redirecting...', 'success');
+                    
+                    // Redirect to game page after a short delay
+                    setTimeout(() => {
+                        window.location.href = 'tiktaktoe.html';
+                    }, 1500);
+                } catch (error) {
+                    showMessage(error.message || 'Login failed, please try again', 'error');
+                }
+            });
+            
+            // Handle signup form submission
+            document.getElementById('signup-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const username = document.getElementById('signup-username').value;
+                const email = document.getElementById('signup-email').value;
+                const password = document.getElementById('signup-password').value;
+                const confirmPassword = document.getElementById('signup-confirm').value;
+                
+                // Validate inputs
+                if (!username || !email || !password || !confirmPassword) {
+                    showMessage('Please fill in all fields', 'error');
+                    return;
+                }
+                
+                if (password !== confirmPassword) {
+                    showMessage('Passwords do not match', 'error');
+                    return;
+                }
+                
+                try {
+                    const response = await fetch(`${API_URL}/users/register`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ username, email, password })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Registration failed');
+                    }
+                    
+                    // Store token and user info
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    
+                    showMessage('Account created successfully! Redirecting...', 'success');
+                    
+                    // Redirect to game page after a short delay
+                    setTimeout(() => {
+                        window.location.href = 'tiktaktoe.html';
+                    }, 1500);
+                } catch (error) {
+                    showMessage(error.message || 'Registration failed, please try again', 'error');
+                }
+            });
+            
+            // Helper functions for showing/hiding messages
+            function showMessage(text, type) {
+                messageElement.textContent = text;
+                messageElement.className = `message ${type}`;
+                messageElement.style.display = 'block';
+            }
+            
+            function hideMessage() {
+                messageElement.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html> 
