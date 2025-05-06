@@ -186,6 +186,26 @@
                 padding: 1.5rem;
             }
         }
+        
+        .guest-option {
+            margin-top: 15px;
+            text-align: center;
+        }
+        
+        .guest-button {
+            background-color: #555;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        
+        .guest-button:hover {
+            background-color: #666;
+        }
     </style>
 </head>
 <body>
@@ -212,6 +232,9 @@
                     <input type="password" id="login-password" required>
                 </div>
                 <button type="submit" class="btn">Login</button>
+                <div class="guest-option">
+                    <button type="button" id="guest-button" class="guest-button">Continue as Guest</button>
+                </div>
                 <div class="form-footer">
                     <p>Don't have an account? <a href="#" class="switch-form" data-form="signup">Sign up now</a></p>
                 </div>
@@ -411,6 +434,21 @@
                 } catch (error) {
                     showMessage(error.message || 'Registration failed, please try again', 'error');
                 }
+            });
+            
+            // Handle guest button click
+            document.getElementById('guest-button').addEventListener('click', function() {
+                // Create a guest user in localStorage
+                const guestUser = {
+                    username: "Guest_" + Math.floor(Math.random() * 10000),
+                    isGuest: true
+                };
+                
+                localStorage.setItem('user', JSON.stringify(guestUser));
+                localStorage.setItem('isGuest', 'true');
+                
+                // Redirect to the game portal
+                window.location.href = 'tiktaktoe.html';
             });
             
             // Helper functions for showing/hiding messages

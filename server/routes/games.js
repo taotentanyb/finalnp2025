@@ -4,129 +4,125 @@ const jwt = require('jsonwebtoken');
 const Game = require('../models/Game');
 const User = require('../models/User');
 
-// Hardcoded JWT Secret
-const JWT_SECRET = 'your_jwt_secret_key';
+// JWT Secret
+const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key';
 
-// Middleware to authenticate token
-const auth = async (req, res, next) => {
+// Helper functions
+const getUserModel = () => {
+  return global.User || User;
+};
+
+const getGameModel = () => {
+  return global.Game || Game;
+};
+
+// Authentication middleware
+const authenticate = async (req, res, next) => {
   try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const token = req.headers.authorization?.split(' ')[1];
     
     if (!token) {
-      return res.status(401).json({ message: 'Authentication required' });
+      return res.status(401).json({ message: 'No token, authorization denied' });
     }
     
-    const decoded = jwt.verify(token, JWT_SECRET);
-    const user = await User.findById(decoded.userId);
-    
-    if (!user) {
-      return res.status(401).json({ message: 'Invalid token' });
+    try {
+      // Verify token
+      const decoded = jwt.verify(token, JWT_SECRET);
+      const UserModel = getUserModel();
+      
+      // Get user
+      const user = await UserModel.findOne({ _id: decoded.userId });
+      
+      if (!user) {
+        return res.status(401).json({ message: 'Invalid token' });
+      }
+      
+      req.user = user;
+      next();
+    } catch (err) {
+      return res.status(401).json({ message: 'Token is not valid' });
     }
-    
-    req.user = user;
-    next();
   } catch (error) {
-    res.status(401).json({ message: 'Authentication failed' });
+    console.error('Auth error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
-// Save a game record
-router.post('/', auth, async (req, res) => {
+// Save a new game record
+router.post('/', authenticate, async (req, res) => {
   try {
-    const { result, opponent, moves, duration, gameType } = req.body;
+    const { result, moves, duration, isAgainstAI, aiDifficulty, opponentId } = req.body;
+    const GameModel = getGameModel();
+    const UserModel = getUserModel();
     
-    const game = new Game({
-      player: req.user._id,
+    // Create game record
+    const players = [req.user._id];
+    if (opponentId && !isAgainstAI) {
+      players.push(opponentId);
+    }
+    
+    const game = await GameModel.create({
+      players,
       result,
-      opponent: opponent || 'Computer',
-      moves: moves || [],
-      duration: duration || 0,
-      gameType: gameType || 'tictactoe'
+      moves,
+      duration,
+      isAgainstAI,
+      aiDifficulty: aiDifficulty || ''
     });
     
-    await game.save();
+    // Update user stats
+    if (req.user.gameStats) {
+      if (result === 'player1_win') {
+        req.user.gameStats.wins += 1;
+      } else if (result === 'player2_win') {
+        req.user.gameStats.losses += 1;
+      } else {
+        req.user.gameStats.draws += 1;
+      }
+      
+      await UserModel.updateOne(
+        { _id: req.user._id },
+        { 
+          $set: { gameStats: req.user.gameStats },
+          $inc: { 'gameStats.totalGames': 1 }
+        }
+      );
+    }
     
-    res.status(201).json(game);
+    res.status(201).json({ game });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Save game error:', error);
+    res.status(500).json({ message: 'Server error saving game' });
   }
 });
 
 // Get user's game history
-router.get('/history', auth, async (req, res) => {
+router.get('/history', authenticate, async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
+    const GameModel = getGameModel();
     
-    const games = await Game.find({ player: req.user._id })
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
-      
-    const total = await Game.countDocuments({ player: req.user._id });
+    // Get games where user is a player
+    const games = await GameModel.find({ 
+      players: req.user._id 
+    }).sort({ createdAt: -1 }).limit(10);
     
-    res.json({
-      games,
-      pagination: {
-        total,
-        page,
-        pages: Math.ceil(total / limit)
-      }
-    });
+    res.json({ games });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Game history error:', error);
+    res.status(500).json({ message: 'Server error retrieving game history' });
   }
 });
 
-// Get game details by ID
-router.get('/:id', auth, async (req, res) => {
+// Get user's game statistics summary
+router.get('/stats/summary', authenticate, async (req, res) => {
   try {
-    const game = await Game.findOne({ 
-      _id: req.params.id,
-      player: req.user._id
+    res.json({ 
+      stats: req.user.gameStats,
+      winRate: req.user.winRate 
     });
-    
-    if (!game) {
-      return res.status(404).json({ message: 'Game not found' });
-    }
-    
-    res.json(game);
   } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// Get user statistics
-router.get('/stats/summary', auth, async (req, res) => {
-  try {
-    const gameStats = await Game.aggregate([
-      { $match: { player: req.user._id } },
-      { $group: {
-          _id: '$result',
-          count: { $sum: 1 }
-        }
-      }
-    ]);
-    
-    // Format the results
-    const stats = {
-      total: 0,
-      wins: 0,
-      losses: 0,
-      draws: 0
-    };
-    
-    gameStats.forEach(stat => {
-      stats[stat._id + 's'] = stat.count;
-      stats.total += stat.count;
-    });
-    
-    stats.winRate = stats.total > 0 ? Math.round((stats.wins / stats.total) * 100) : 0;
-    
-    res.json(stats);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Game stats error:', error);
+    res.status(500).json({ message: 'Server error retrieving game stats' });
   }
 });
 

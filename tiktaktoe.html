@@ -505,15 +505,30 @@
       // Check if user is logged in
       const token = localStorage.getItem('token');
       const userInfo = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
+      const isGuest = localStorage.getItem('isGuest') === 'true';
       const userContainer = document.getElementById('user-container');
       
-      if (!token || !userInfo) {
+      if ((!token && !isGuest) || !userInfo) {
         // User is not logged in - redirect to login page
         window.location.href = 'login.html';
         return;
       } else {
-        // User is logged in - show user info
+        // User is logged in or is a guest - show user info
         const firstLetter = userInfo.username.charAt(0).toUpperCase();
+        
+        let dropdownContent = '';
+        if (isGuest) {
+          dropdownContent = `
+            <a href="profile.html">My Profile</a>
+            <a href="login.html">Login / Register</a>
+          `;
+        } else {
+          dropdownContent = `
+            <a href="profile.html">My Profile</a>
+            <a href="#">Settings</a>
+            <a href="#" id="logout-btn">Logout</a>
+          `;
+        }
         
         userContainer.innerHTML = `
           <div class="dropdown" id="user-dropdown">
@@ -522,9 +537,7 @@
               <span class="username">${userInfo.username}</span>
             </div>
             <div class="dropdown-content">
-              <a href="profile.html">My Profile</a>
-              <a href="#">Settings</a>
-              <a href="#" id="logout-btn">Logout</a>
+              ${dropdownContent}
             </div>
           </div>
         `;
@@ -543,12 +556,16 @@
         });
         
         // Add logout functionality
-        document.getElementById('logout-btn').addEventListener('click', (e) => {
-          e.preventDefault();
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          window.location.href = 'login.html';
-        });
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) {
+          logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('isGuest');
+            window.location.href = 'login.html';
+          });
+        }
       }
       
       // Fix Play Now button

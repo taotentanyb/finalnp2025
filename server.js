@@ -299,36 +299,96 @@ function sendToClient(client, data) {
 // Try to connect with local MongoDB first
 const LOCAL_MONGODB_URI = 'mongodb://localhost:27017/gameportal';
 // Fallback to MongoDB Atlas URI (you can replace this with your own connection string if you have one)
-const ATLAS_MONGODB_URI = 'mongodb+srv://demo:demo123@cluster0.mongodb.net/gameportal?retryWrites=true&w=majority';
+const ATLAS_MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://demo:demo123@cluster0.mongodb.net/gameportal?retryWrites=true&w=majority';
 const PORT = process.env.PORT || 5000;
 
-// First try local connection
-mongoose.connect(LOCAL_MONGODB_URI)
-  .then(() => {
-    console.log('Connected to local MongoDB');
-    startServer();
-  })
-  .catch(localErr => {
-    console.log('Failed to connect to local MongoDB, trying Atlas...');
-    
-    // Fallback to Atlas if local fails
-    mongoose.connect(ATLAS_MONGODB_URI)
-      .then(() => {
-        console.log('Connected to MongoDB Atlas');
-        startServer();
-      })
-      .catch(atlasErr => {
-        console.error('Failed to connect to MongoDB Atlas', atlasErr);
-        
-        // Handle fallback to in-memory "DB" with limited functionality
-        console.log('Starting server without database connection');
-        console.log('Note: User registration and game history will not be saved');
-        startServer();
-      });
-  });
+// Create a dummy user model if database connection fails
+const createDummyModels = () => {
+  console.log('Creating in-memory user model...');
+  // In-memory storage
+  const users = [];
+  
+  // Mock User model for when DB is unavailable
+  const User = {
+    findOne: async (query) => {
+      return users.find(user => user.username === query.username || user.email === query.email);
+    },
+    create: async (userData) => {
+      const newUser = { 
+        ...userData, 
+        _id: Date.now().toString(),
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      users.push(newUser);
+      return newUser;
+    }
+  };
+  
+  // Mock Game model for when DB is unavailable
+  const Game = {
+    create: async (gameData) => {
+      return { ...gameData, _id: Date.now().toString() };
+    },
+    find: async (query) => {
+      return [];
+    }
+  };
+  
+  return { User, Game };
+};
+
+// If using Glitch, prioritize MongoDB Atlas connection
+if (process.env.PROJECT_DOMAIN && process.env.PROJECT_DOMAIN.includes('glitch')) {
+  console.log('Running on Glitch, connecting to MongoDB Atlas...');
+  mongoose.connect(ATLAS_MONGODB_URI)
+    .then(() => {
+      console.log('Connected to MongoDB Atlas');
+      startServer();
+    })
+    .catch(err => {
+      console.error('Failed to connect to MongoDB Atlas:', err);
+      const { User, Game } = createDummyModels();
+      global.User = User;
+      global.Game = Game;
+      startServer();
+    });
+} else {
+  // Local development, try local MongoDB first
+  mongoose.connect(LOCAL_MONGODB_URI)
+    .then(() => {
+      console.log('Connected to local MongoDB');
+      startServer();
+    })
+    .catch(localErr => {
+      console.log('Failed to connect to local MongoDB, trying Atlas...');
+      
+      // Fallback to Atlas if local fails
+      mongoose.connect(ATLAS_MONGODB_URI)
+        .then(() => {
+          console.log('Connected to MongoDB Atlas');
+          startServer();
+        })
+        .catch(atlasErr => {
+          console.error('Failed to connect to MongoDB Atlas', atlasErr);
+          
+          // Handle fallback to in-memory "DB" with limited functionality
+          console.log('Starting server without database connection');
+          console.log('Note: User registration and game history will not be saved persistently');
+          
+          const { User, Game } = createDummyModels();
+          global.User = User;
+          global.Game = Game;
+          startServer();
+        });
+    });
+}
 
 function startServer() {
   server.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
+    if (process.env.PROJECT_DOMAIN) {
+      console.log(`Live at: https://${process.env.PROJECT_DOMAIN}.glitch.me`);
+    }
   });
 } 

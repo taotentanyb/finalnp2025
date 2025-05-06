@@ -1,12 +1,13 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-const UserSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
     unique: true,
-    trim: true
+    trim: true,
+    minlength: 3
   },
   email: {
     type: String,
@@ -17,13 +18,10 @@ const UserSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: true
+    required: true,
+    minlength: 6
   },
-  stats: {
-    totalGames: {
-      type: Number,
-      default: 0
-    },
+  gameStats: {
     wins: {
       type: Number,
       default: 0
@@ -35,22 +33,24 @@ const UserSchema = new mongoose.Schema({
     draws: {
       type: Number,
       default: 0
+    },
+    totalGames: {
+      type: Number,
+      default: 0
     }
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
   }
+}, {
+  timestamps: true
 });
 
-// Calculate win rate
-UserSchema.virtual('winRate').get(function() {
-  if (this.stats.totalGames === 0) return 0;
-  return Math.round((this.stats.wins / this.stats.totalGames) * 100);
+// Virtual for winRate
+userSchema.virtual('winRate').get(function() {
+  if (this.gameStats.totalGames === 0) return 0;
+  return (this.gameStats.wins / this.gameStats.totalGames) * 100;
 });
 
-// Hash password before saving
-UserSchema.pre('save', async function(next) {
+// Pre-save hook to hash password
+userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
   
   try {
@@ -62,9 +62,22 @@ UserSchema.pre('save', async function(next) {
   }
 });
 
-// Method to compare passwords
-UserSchema.methods.comparePassword = async function(candidatePassword) {
+// Method to compare password
+userSchema.methods.comparePassword = async function(candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
-module.exports = mongoose.model('User', UserSchema); 
+// Update totalGames when other stats change
+userSchema.pre('save', function(next) {
+  if (this.isModified('gameStats.wins') || 
+      this.isModified('gameStats.losses') || 
+      this.isModified('gameStats.draws')) {
+    this.gameStats.totalGames = 
+      this.gameStats.wins + this.gameStats.losses + this.gameStats.draws;
+  }
+  next();
+});
+
+const User = mongoose.model('User', userSchema);
+
+module.exports = User; 

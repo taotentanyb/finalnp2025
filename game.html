@@ -658,41 +658,7 @@
                     return;
                 }
 
-                // Connect to our WebSocket server
-                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-                const wsUrl = `${protocol}//${window.location.host}`;
-                try {
-                    socket = new WebSocket(wsUrl);
-                    
-                    socket.onopen = () => {
-                        connected = true;
-                        updateConnectionStatus('connected', 'Connected');
-                        connectButton.textContent = 'Disconnect';
-                        findMatchButton.disabled = false;
-                        
-                        // Send initial player info
-                        sendToServer({
-                            action: 'player_info',
-                            username: username
-                        });
-                    };
-                    
-                    socket.onmessage = (event) => {
-                        handleServerMessage(event.data);
-                    };
-                    
-                    socket.onclose = () => {
-                        disconnectFromServer();
-                    };
-                    
-                    socket.onerror = (error) => {
-                        console.error('WebSocket error:', error);
-                        disconnectFromServer();
-                    };
-                } catch (error) {
-                    console.error('Failed to connect:', error);
-                    disconnectFromServer();
-                }
+                connectToServer(username);
             }
 
             function disconnectFromServer() {
@@ -828,6 +794,58 @@
             
             // Initialize the game
             initGame();
+
+            function connectToServer(username) {
+                // Determine WebSocket URL based on current location
+                let wsUrl;
+                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                
+                if (window.location.hostname.includes('glitch.me')) {
+                    // We're on Glitch
+                    wsUrl = `${protocol}//${window.location.host}`;
+                } else if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                    // We're on localhost
+                    wsUrl = `${protocol}//${window.location.host}`;
+                } else {
+                    // Fallback to the current hostname
+                    wsUrl = `${protocol}//${window.location.host}`;
+                }
+                
+                try {
+                    console.log(`Connecting to WebSocket at: ${wsUrl}`);
+                    socket = new WebSocket(wsUrl);
+                    
+                    socket.onopen = () => {
+                        connected = true;
+                        updateConnectionStatus('connected', 'Connected');
+                        connectButton.textContent = 'Disconnect';
+                        findMatchButton.disabled = false;
+                        
+                        // Send initial player info
+                        sendToServer({
+                            action: 'player_info',
+                            username: username
+                        });
+                    };
+                    
+                    socket.onmessage = (event) => {
+                        handleServerMessage(event.data);
+                    };
+                    
+                    socket.onclose = () => {
+                        console.log('WebSocket connection closed');
+                        disconnectFromServer();
+                    };
+                    
+                    socket.onerror = (error) => {
+                        console.error('WebSocket error:', error);
+                        disconnectFromServer();
+                    };
+                } catch (error) {
+                    console.error('Failed to connect:', error);
+                    disconnectFromServer();
+                }
+            }
         });
     </script>
 </body>
