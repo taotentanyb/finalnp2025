@@ -25,8 +25,8 @@ Bạn có thể chơi game trực tuyến tại: [https://yourusername.github.io
 1. Clone dự án về máy:
 
 ```bash
-git clone https://github.com/yourusername/tic-tac-toe-online.git
-cd tic-tac-toe-online
+git clone https://github.com/taotentanyb/finalnp2025
+cd finalnp2025
 ```
 
 2. Cài đặt các dependencies:
