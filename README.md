@@ -11,12 +11,11 @@ Game Tic Tac Toe trực tuyến với chế độ chơi đối kháng với AI h
 
 ## Demo
 
-Bạn có thể chơi game trực tuyến tại: [https://yourusername.github.io/tic-tac-toe-online](https://yourusername.github.io/tic-tac-toe-online)
-
+Bạn có thể chơi game trực tuyến tại: https://tictactoenp.glitch.me
 ## Cài đặt và chạy cục bộ
 
 ### Yêu cầu tiên quyết
-
+ 
 - Node.js (khuyến nghị phiên bản 14.x trở lên)
 - npm (đi kèm với Node.js)
 
@@ -60,7 +59,7 @@ git init
 git add .
 git commit -m "Initial commit"
 git branch -M main
-git remote add origin https://github.com/yourusername/tic-tac-toe-online.git
+git remote add origin https://github.com/taotentanyb/finalnp2025/edit
 git push -u origin main
 ```
 
@@ -68,38 +67,22 @@ git push -u origin main
 
 4. Chọn "Branch: main" và thư mục "/root" (hoặc "/docs" nếu bạn đặt file HTML trong thư mục docs) và click "Save"
 
-5. Sau vài phút, trang web của bạn sẽ được triển khai tại `https://yourusername.github.io/tic-tac-toe-online`
+5. Sau vài phút, trang web của bạn sẽ được triển khai tại https://github.com/taotentanyb/finalnp2025/edit   
+
 
 ### Triển khai phiên bản đầy đủ với WebSocket server
 
-Để triển khai phiên bản có hỗ trợ chơi trực tuyến, bạn cần một máy chủ thực sự. Dưới đây là cách triển khai lên Heroku:
+Để triển khai phiên bản có hỗ trợ chơi trực tuyến, bạn cần một máy chủ thực sự. Ở đây chúng tôi sử dụng glitch:
 
-1. Tạo tài khoản trên [Heroku](https://www.heroku.com/)
-
-2. Cài đặt Heroku CLI:
-   ```bash
-   npm install -g heroku
-   ```
-
-3. Đăng nhập Heroku từ terminal:
-   ```bash
-   heroku login
-   ```
-
-4. Tạo một ứng dụng mới trên Heroku:
-   ```bash
-   heroku create your-app-name
-   ```
-
-5. Push code lên Heroku:
-   ```bash
-   git push heroku main
-   ```
-
-6. Mở ứng dụng:
-   ```bash
-   heroku open
-   ```
+1. Tạo tài khoản trên [glitch](https://www.glitch.com/)
+2. Import code từ github
+-git add .
+git commit -m "add code"
+git push origin main
+3. Setup môi trường 
+-Tạo tài khoản trên MongoDB Atlas 
+Connect với App bằng API
+setup env trong glitch để kết nối
 
 ## Cách chơi
 
