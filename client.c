@@ -8,6 +8,7 @@
 #include <signal.h>
 #include <netdb.h>  // Added for getaddrinfo
 #include <curl/curl.h>  // Added for fetching GitHub file
+#include <time.h>   // Added for time() function
 
 // Default connection settings
 #define DEFAULT_LAN_HOST "127.0.0.1"
@@ -55,14 +56,29 @@ int download_ngrok_info(char *host, int *port) {
     if (curl) {
         fp = fopen(temp_file, "w");
         if (fp) {
+            // Add no-cache headers to bypass GitHub caching
+            struct curl_slist *headers = NULL;
+            headers = curl_slist_append(headers, "Cache-Control: no-cache, no-store");
+            headers = curl_slist_append(headers, "Pragma: no-cache");
+            
             curl_easy_setopt(curl, CURLOPT_URL, GITHUB_RAW_URL);
             curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
             curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
             curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L);
+            curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+            curl_easy_setopt(curl, CURLOPT_FRESH_CONNECT, 1L); // Force a new connection
+            curl_easy_setopt(curl, CURLOPT_FORBID_REUSE, 1L);   // Prevent connection reuse
             
-            printf("Đang tải thông tin ngrok từ GitHub...\n");
+            // Add random query parameter to bypass caching
+            char random_url[512];
+            snprintf(random_url, sizeof(random_url), "%s?nocache=%ld", GITHUB_RAW_URL, time(NULL));
+            curl_easy_setopt(curl, CURLOPT_URL, random_url);
+            
+            printf("Đang tải thông tin ngrok từ GitHub (%s)...\n", random_url);
             res = curl_easy_perform(curl);
             fclose(fp);
+            
+            curl_slist_free_all(headers);
             
             if (res == CURLE_OK) {
                 FILE *info_file = fopen(temp_file, "r");
@@ -70,6 +86,8 @@ int download_ngrok_info(char *host, int *port) {
                     if (fscanf(info_file, "%s %d", host, port) == 2) {
                         printf("Đã tải thông tin ngrok: %s:%d\n", host, *port);
                         success = 1;
+                    } else {
+                        printf("Lỗi định dạng file ngrok từ GitHub\n");
                     }
                     fclose(info_file);
                 }
@@ -79,7 +97,12 @@ int download_ngrok_info(char *host, int *port) {
         }
         curl_easy_cleanup(curl);
     }
-    remove(temp_file);
+    
+    // Make sure to remove temp file
+    if (remove(temp_file) != 0) {
+        printf("Cảnh báo: Không thể xóa file tạm %s\n", temp_file);
+    }
+    
     return success;
 }
 
@@ -137,11 +160,12 @@ int main(int argc, char *argv[]) {
             connection_mode = 2; // WAN
             printf("Đã chọn kết nối WAN\n");
             
-            // Try to get ngrok info - first from local file, then from GitHub
-            if (!read_local_ngrok_info(host, &port)) {
-                printf("Không tìm thấy thông tin ngrok cục bộ, thử tải từ GitHub...\n");
-                if (!download_ngrok_info(host, &port)) {
-                    printf("Không thể lấy thông tin ngrok từ GitHub.\n");
+            // Try to get ngrok info - first from GitHub, then from local file
+            printf("Đang thử tải thông tin ngrok từ GitHub...\n");
+            if (!download_ngrok_info(host, &port)) {
+                printf("Không thể lấy thông tin ngrok từ GitHub, thử đọc file cục bộ...\n");
+                if (!read_local_ngrok_info(host, &port)) {
+                    printf("Không tìm thấy thông tin ngrok cục bộ.\n");
                     
                     // Prompt for manual entry
                     printf("Nhập host ngrok (ví dụ: 0.tcp.ap.ngrok.io): ");
