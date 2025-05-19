@@ -813,8 +813,26 @@ void update_github_file() {
     // Remove newline character if present
     ngrok_info[strcspn(ngrok_info, "\n")] = 0;
     
+    // First, get the SHA of the existing file (if it exists)
+    char sha[100] = "";
+    char get_sha_cmd[512];
+    sprintf(get_sha_cmd, 
+            "curl -s -H \"Authorization: token %s\" "
+            "-H \"Accept: application/vnd.github.v3+json\" "
+            "https://api.github.com/repos/%s/contents/%s | grep sha | head -1 | cut -d '\"' -f 4",
+            token, GITHUB_REPO, NGROK_PORT_FILE);
+    
+    FILE *sha_file = popen(get_sha_cmd, "r");
+    if (sha_file) {
+        if (fgets(sha, sizeof(sha), sha_file) != NULL) {
+            // Remove newline if present
+            sha[strcspn(sha, "\n")] = 0;
+            printf("Found existing file with SHA: %s\n", sha);
+        }
+        pclose(sha_file);
+    }
+    
     // Create JSON data for GitHub API
-    // Note: We're using bash and curl to avoid JSON encoding issues
     fprintf(temp, "{\n");
     fprintf(temp, "  \"message\": \"Update ngrok connection info\",\n");
     fprintf(temp, "  \"content\": \"");
@@ -838,10 +856,14 @@ void update_github_file() {
     }
     pclose(base64_pipe);
     
-    fprintf(temp, "%s\"\n", base64);
+    fprintf(temp, "%s\"", base64);
     
-    // Check if file already exists to get the SHA
-    fprintf(temp, "}\n");
+    // Add SHA if it exists
+    if (strlen(sha) > 0) {
+        fprintf(temp, ",\n  \"sha\": \"%s\"", sha);
+    }
+    
+    fprintf(temp, "\n}\n");
     fclose(temp);
     
     // Use curl to update the file on GitHub
@@ -853,8 +875,15 @@ void update_github_file() {
             "https://api.github.com/repos/%s/contents/%s", 
             token, GITHUB_REPO, NGROK_PORT_FILE);
     
-    system(curl_cmd);
-    printf("GitHub update request sent.\n");
+    printf("Sending GitHub update request...\n");
+    FILE *response = popen(curl_cmd, "r");
+    if (response) {
+        char response_line[1024];
+        while (fgets(response_line, sizeof(response_line), response)) {
+            printf("%s", response_line);
+        }
+        pclose(response);
+    }
     
     // Clean up temporary file
     remove("github_update.json");
