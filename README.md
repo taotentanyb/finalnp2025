@@ -33,6 +33,7 @@ Compile both the client and server programs:
 gcc server.c -o server -pthread
 
 # Compile the client
+sudo apt-get install libcurl4-openssl-dev
 gcc client.c -o client -lcurl
 ```
 
